@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">KonturTest</string>
+    <string name="hint_find_contact">Find contact</string>
+</resources>
