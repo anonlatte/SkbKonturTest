@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.konturtest.MainActivity
 import com.example.konturtest.R
 import com.example.konturtest.databinding.MainFragmentBinding
+import com.example.konturtest.repository.Repository
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.main_fragment.*
 import java.util.*
@@ -20,13 +21,15 @@ import java.util.*
 
 class MainFragment : Fragment(), Observer {
 
-    val contactsListAdapter = ContactsListAdapter()
     private lateinit var mainFragmentBinding: MainFragmentBinding
-    private var viewModel = MainViewModel()
+    private lateinit var viewModel: MainViewModel
+    lateinit var contactsListAdapter: ContactsListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        viewModel = MainViewModel(Repository(requireContext()))
+        contactsListAdapter = ContactsListAdapter(viewModel)
         setUpObserver(viewModel)
     }
 
@@ -54,6 +57,7 @@ class MainFragment : Fragment(), Observer {
 
         mainFragmentBinding.viewModel = viewModel
 
+        // Adapter setting up
         contactsList.adapter = contactsListAdapter
         contactsList.layoutManager = LinearLayoutManager(context)
         contactsList.addItemDecoration(
@@ -63,12 +67,15 @@ class MainFragment : Fragment(), Observer {
             )
         )
 
+        // Subscribe to an error holder variable
         val errorDispose = viewModel.errorMessages.subscribe {
             Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG).show()
         }
 
+        // Retrieve contacts at launch
         viewModel.getAllContacts()
 
+        // Subscribing to variable, which keeps selected item from the list.
         val dispose = viewModel.selectedContact.subscribe({ contact ->
             val contactBundle = bundleOf("contact" to contact)
             view?.findNavController()
@@ -81,7 +88,7 @@ class MainFragment : Fragment(), Observer {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
 
-        // Initialize top appbar search
+        // Initialize top AppBar SearchView
         menu.clear()
         inflater.inflate(R.menu.menu_search, menu)
         val searchView =

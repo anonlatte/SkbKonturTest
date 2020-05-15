@@ -12,12 +12,11 @@ import com.example.konturtest.db.model.Contact
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-class ContactsListAdapter : RecyclerView.Adapter<ContactsListAdapter.ItemViewHolder>(), Filterable {
+class ContactsListAdapter(var mainViewModel: MainViewModel) :
+    RecyclerView.Adapter<ContactsListAdapter.ItemViewHolder>(), Filterable {
 
     var contacts = mutableListOf<Contact>()
     var contactsFiltered = contacts
-    var mainViewModel = MainViewModel()
 
     private fun getObjForPosition(position: Int) = contactsFiltered[position]
 
@@ -62,6 +61,10 @@ class ContactsListAdapter : RecyclerView.Adapter<ContactsListAdapter.ItemViewHol
                     contacts
                 } else {
                     val filteredList: MutableList<Contact> = ArrayList()
+                    /*
+                    * If name or phonenumber (only numbers) contains entered characters then
+                    * add rows to a filtered contacts list
+                    */
                     for (row in contacts) {
                         if (row.name.toLowerCase(Locale.ROOT)
                                 .contains(charString.toLowerCase(Locale.ROOT))

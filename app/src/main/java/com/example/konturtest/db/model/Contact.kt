@@ -30,6 +30,7 @@ data class Contact(
 
     fun getHeight() = height.toString()
 
+    // Converter for correctly fields in data binding displaying
     fun getEducationPeriod(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val customFormat = SimpleDateFormat("d.MM.yyyy", Locale.getDefault())
