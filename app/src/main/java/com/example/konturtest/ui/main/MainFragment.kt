@@ -1,23 +1,27 @@
 package com.example.konturtest.ui.main
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.SearchView
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.konturtest.MainActivity
 import com.example.konturtest.R
 import com.example.konturtest.databinding.MainFragmentBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.main_fragment.*
 import java.util.*
 
 
 class MainFragment : Fragment(), Observer {
+
     val contactsListAdapter = ContactsListAdapter()
     private lateinit var mainFragmentBinding: MainFragmentBinding
-
     private var viewModel = MainViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +62,20 @@ class MainFragment : Fragment(), Observer {
                 DividerItemDecoration.VERTICAL
             )
         )
+
+        val errorDispose = viewModel.errorMessages.subscribe {
+            Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG).show()
+        }
+
         viewModel.getAllContacts()
+
+        val dispose = viewModel.selectedContact.subscribe({ contact ->
+            val contactBundle = bundleOf("contact" to contact)
+            view?.findNavController()
+                ?.navigate(R.id.action_mainFragment_to_profileFragment, contactBundle)
+        }, {
+            Log.e("Error", it.message.toString())
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -93,6 +110,7 @@ class MainFragment : Fragment(), Observer {
                 mainFragmentBinding.contactsList.adapter as ContactsListAdapter
             val mainViewModel: MainViewModel = observable
             contactsAdapter.setData(mainViewModel.totalContacts)
+            contactsAdapter.mainViewModel = mainViewModel
         }
     }
 }

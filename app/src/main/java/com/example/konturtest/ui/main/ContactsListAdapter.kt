@@ -17,6 +17,7 @@ class ContactsListAdapter : RecyclerView.Adapter<ContactsListAdapter.ItemViewHol
 
     var contacts = mutableListOf<Contact>()
     var contactsFiltered = contacts
+    var mainViewModel = MainViewModel()
 
     private fun getObjForPosition(position: Int) = contactsFiltered[position]
 
@@ -38,15 +39,16 @@ class ContactsListAdapter : RecyclerView.Adapter<ContactsListAdapter.ItemViewHol
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.bind(getObjForPosition(position))
+        holder.bind(getObjForPosition(position), position)
     }
 
     inner class ItemViewHolder(private val binding: ListItemContactBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(contact: Contact) {
+        fun bind(contact: Contact, position: Int) {
             with(binding) {
-                viewModel = MainViewModel()
+                this.viewModel = mainViewModel
                 this.contact = contact
+                this.position = position
                 executePendingBindings()
             }
         }
@@ -82,6 +84,7 @@ class ContactsListAdapter : RecyclerView.Adapter<ContactsListAdapter.ItemViewHol
             ) {
                 @Suppress("UNCHECKED_CAST")
                 contactsFiltered = filterResults.values as MutableList<Contact>
+                mainViewModel.filteredContacts = contactsFiltered
                 notifyDataSetChanged()
             }
         }

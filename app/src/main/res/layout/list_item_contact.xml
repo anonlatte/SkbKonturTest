@@ -4,6 +4,12 @@
 
     <data>
 
+        <import type="android.view.View" />
+
+        <variable
+            name="position"
+            type="Integer" />
+
         <variable
             name="viewModel"
             type="com.example.konturtest.ui.main.MainViewModel" />
@@ -18,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/two_line_list_item"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:onClick="@{() -> viewModel.onItemClick(position)}">
 
         <TextView
             android:id="@+id/name"

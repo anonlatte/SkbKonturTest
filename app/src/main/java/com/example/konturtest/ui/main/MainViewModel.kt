@@ -8,16 +8,18 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 
 class MainViewModel : java.util.Observable() {
     private val repository = RepositoryProvider.provideRepository()
+    var errorMessages: Subject<String> = PublishSubject.create()
     var totalContacts: MutableList<Contact> = mutableListOf()
+    var filteredContacts = mutableListOf<Contact>()
     private val compositeDisposable = CompositeDisposable()
-    val isLoading = ObservableBoolean(false)
-
+    val isLoading = ObservableBoolean(true)
+    var selectedContact: Subject<Contact> = PublishSubject.create()
     fun getAllContacts() {
-        totalContacts.clear()
         val firstContactsList = repository.getContacts("generated-01.json")
         val secondContactsList = repository.getContacts("generated-02.json")
         val thirdContactsList = repository.getContacts("generated-03.json")
@@ -29,29 +31,36 @@ class MainViewModel : java.util.Observable() {
                 updateContactsDataList(it)
             }, {
                 onError()
-                Log.e("Response", it?.localizedMessage?.toString()!!)
+                errorMessages.onNext("Нет подключения к сети")
+                Log.e("Response", it?.cause.toString())
             })
 
         compositeDisposable.add(disposable)
     }
 
     fun onRefresh() {
+        totalContacts.clear()
         isLoading.set(true)
         getAllContacts()
     }
 
-    fun onReady() {
+    private fun onReady() {
         isLoading.set(false)
     }
 
-    fun onError() {
+    private fun onError() {
         isLoading.set(false)
     }
 
     private fun updateContactsDataList(contacts: List<Contact>) {
         totalContacts.addAll(contacts.toMutableList())
+        filteredContacts = totalContacts
         setChanged()
         onReady()
         notifyObservers()
+    }
+
+    fun onItemClick(position: Int) {
+        selectedContact.onNext(filteredContacts[position])
     }
 }
